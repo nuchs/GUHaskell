@@ -3,6 +3,8 @@ import System.Random
 
 data ScorePeg = Black | White | None deriving Show
 data Score = Score ScorePeg ScorePeg ScorePeg ScorePeg deriving Show
+type TurnCount = Int
+type Code = String
 
 nil :: Score
 nil = Score None None None None
@@ -13,7 +15,7 @@ main = do
   let code = take 4 $ randomRs ('0', '9') generator
   playGame code 10 nil
 
-playGame :: String -> Int -> Score -> IO ()
+playGame :: Code -> TurnCount -> Score -> IO ()
 playGame code 0 _ = gameOver code
 playGame code turnsLeft score= do
   guess <- ui code turnsLeft score
@@ -22,30 +24,29 @@ playGame code turnsLeft score= do
   then putStrLn "You've cracked the code"
   else playGame code (turnsLeft-1) score'
 
-gameOver :: String -> IO ()
+gameOver :: Code -> IO ()
 gameOver code = do
   putStrLn "You lose, loser"
   putStrLn $ "The code was : " ++ code
 
-ui :: String -> Int -> Score -> IO (String)
+ui :: Code -> TurnCount -> Score -> IO Code
 ui code turnsLeft score = do
   putStrLn $ show score 
-  putStr $ show turnsLeft ++ " | Enter guess: "
-  guess <- getLine
-  return guess
+  putStrLn $ show turnsLeft ++ " | Enter guess: "
+  getLine
 
-check :: String -> String -> (Bool, Score)
+check :: Code -> Code -> (Bool, Score)
 check guess code = (cracked, score)
   where blackPegs = exactMatches guess code
         whitePegs = valueMatches guess code blackPegs
         score     = fromPegList $ makeScore blackPegs whitePegs
         cracked   = blackPegs == length code
 
-exactMatches :: String -> String -> Int
+exactMatches :: Code -> Code -> Int
 exactMatches guess code = length . filter hit $ zip guess code
   where hit (a,b) = a == b
 
-valueMatches :: String -> String -> Int -> Int
+valueMatches :: Code -> Code -> Int -> Int
 valueMatches guess code orderMatches = length code - (diffs + orderMatches)
   where diffs = length $ guess \\ code
 
