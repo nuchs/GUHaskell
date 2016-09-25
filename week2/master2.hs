@@ -1,6 +1,7 @@
 import Data.List
 import System.Random
 
+data CodePeg = Red | Green | Blue | Yellow | Orange | Brown deriving (Show, Eq)
 data ScorePeg = Black | White | None deriving Show
 data Score = Score ScorePeg ScorePeg ScorePeg ScorePeg deriving Show
 type TurnCount = Int
@@ -9,11 +10,14 @@ type Code = String
 nil :: Score
 nil = Score None None None None
 
+gameLength :: TurnCount
+gameLength = 12
+
 main :: IO ()
 main = do
   generator <- getStdGen
   let code = take 4 $ randomRs ('0', '9') generator
-  playGame code 10 nil
+  playGame code gameLength nil
 
 playGame :: Code -> TurnCount -> Score -> IO ()
 playGame code 0 _ = gameOver code
